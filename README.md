@@ -1,4 +1,4 @@
-# DSA_and_Applied_Algorithms
+# DSA and Applied Algorithms
 
 This repository contains implementations of **Data Structures and Algorithms (DSA)**, along with solutions to applied algorithmic problems using **C++**. The aim is to enhance problem-solving skills and strengthen understanding of core algorithms and data structures.
 
