@@ -1,67 +1,50 @@
-#include<iostream>
-#include<vector>
-#include<algorithm>
+#include <iostream>
+#include <vector>
+#include <stack>
 using namespace std;
 
-const int N = 1e3 + 1;
-int a[N][N];
-int n, m;
-int h[N];
-int L[N], R[N];
-
-void input() {
+int main() {
+    vector<vector<int> > a(1000, vector<int>(1000, 0)); // S?a d?u >>
+    long long n, m;
     cin >> n >> m;
-    for(int i = 1; i <= n; i++) {
-        for(int j = 1; j <= m; j++) {
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
             cin >> a[i][j];
         }
     }
-}
-
-long long compute() {
-    vector<int> V;
-    // Tính toán biên ph?i R
-    for(int i = 1; i <= m; i++) {
-        while(!V.empty() && h[i] < h[V.back()]) {
-            R[V.back()] = i;
-            V.pop_back();
+    
+    vector<vector<int> > height(n, vector<int>(m, 0)); // S?a d?u >>
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            if (a[i][j] == 1) {
+                height[i][j] = (i == 0) ? 1 : height[i - 1][j] + 1;
+            }
         }
-        V.push_back(i);
     }
-    // Lam sach stack cho bien trai
-    V.clear();
-    // Tinh toan bien trai L
-    for(int i = m; i >= 1; i--) {
-        while(!V.empty() && h[i] < h[V.back()]) {
-            L[V.back()] = i;
-            V.pop_back();
-        }
-        V.push_back(i);
-    }
-    // Tinh dien tich hinh chu nhat lon nhat
-    long long max_area = 0;
-    for(int i = 1; i <= m; i++) {
-        long long area = (R[i] - L[i] - 1) * h[i];
-        max_area = max(max_area, area);
-    }
-    return max_area;
-}
 
-void solve() {
-    long long ans = 0;
-    fill(h, h + m + 1, 0); // Khoi tao mang voi gia tri 0
-    for(int i = 1; i <= n; i++) {
-        for(int j = 1; j <= m; j++) {
-            h[j] = (a[i][j] == 0) ? 0 : h[j] + 1;
+    int max_area = 0;
+    for (int i = 0; i < n; i++) {
+        stack<int> s;
+        int j = 0;
+        while (j < m) {
+            if (s.empty() || height[i][s.top()] <= height[i][j]) {
+                s.push(j++);
+            } else {
+                int tp = s.top();
+                s.pop();
+                int area = height[i][tp] * (s.empty() ? j : j - s.top() - 1);
+                max_area = max(max_area, area);
+            }
         }
-        ans = max(ans, compute());
+        while (!s.empty()) {
+            int tp = s.top();
+            s.pop();
+            int area = height[i][tp] * (s.empty() ? j : j - s.top() - 1);
+            max_area = max(max_area, area);
+        }
     }
-    cout << ans << endl;
-}
 
-int main() {
-    input();
-    solve();
+    cout << max_area << endl;
     return 0;
 }
 
