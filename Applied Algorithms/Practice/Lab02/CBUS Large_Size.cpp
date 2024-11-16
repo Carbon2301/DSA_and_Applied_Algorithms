@@ -42,9 +42,7 @@ int main() {
         }
     }
 
-
     int result = solve(n, k, c);
-
     
     cout << n << endl;
     cout << result << endl;
