@@ -1,89 +1,83 @@
 #include <bits/stdc++.h>
+
 using namespace std;
-#define MAX 100
 
-int N; // number of requests (1,2,...,N). Request i has pickup point i and drop-off point i + N
-int cap; // number of places of the bus
-int A[2 * MAX + 1][2 * MAX + 1];
-
-int x[MAX];
-int appear[MAX]; // marking
-int load;
-int f;
-int f_best;
-int x_best[MAX];
-int cmin;
-
-void input() {
-    scanf("%d%d", &N, &cap);
-    cmin = 1000000;
-    for (int i = 0; i <= 2 * N; i++) {
-        for (int j = 0; j <= 2 * N; j++) {
-            scanf("%d", &A[i][j]);
-            if (i != j && cmin > A[i][j]) cmin = A[i][j];
-        }
-    }
-}
-
-int check(int v, int k) {
-    if (appear[v] == 1) return 0;
-    if (v > N) {
-        if (!appear[v - N]) return 0;
-    } else {
-        if (load + 1 > cap) return 0;
-    }
-    return 1;
-}
-
-void solution() {
-    if (f + A[x[2 * N]][0] < f_best) {
-        f_best = f + A[x[2 * N]][0];
-        for (int i = 0; i <= 2 * N; i++) x_best[i] = x[i];
-        // printf("update best %d\n", f_best);
-    }
-}
-
-void TRY(int k) {
-    for (int v = 1; v <= 2 * N; v++) {
-        if (check(v, k)) {
-            x[k] = v;
-            f += A[x[k - 1]][x[k]];
-            if (v <= N) load += 1; else load -= 1;
-            appear[v] = 1;
-            if (k == 2 * N) {
-                solution();
-            } else {
-                if (f + (2 * N + 1 - k) * cmin < f_best) {
-                    TRY(k + 1);
-                }
-            }
-            if (v <= N) load -= 1; else load += 1;
-            appear[v] = 0;
-            f -= A[x[k - 1]][x[k]];
-        }
-    }
-}
-
-void solve() {
-    load = 0;
-    f = 0;
-    f_best = 1000000;
-    for (int i = 1; i <= 2 * N; i++) appear[i] = 0;
-    x[0] = 0; // starting point
-    TRY(1);
-    printf("%d\n", f_best);
-}
-
-void print() {
-    for (int i = 0; i <= 2 * N; i++) 
-        printf("%d ", x_best[i]);
-    printf("\n");
-}
+struct Request {
+    int pickup;
+    int dropoff;
+};
 
 int main() {
-    input();
-    solve();
-    print();
+    int n, k;
+    cin >> n >> k;
+    int size = 2 * n + 1;
+    vector<vector<int>> c(size, vector<int>(size));
+    for (int i = 0; i < size; ++i) {
+        for (int j = 0; j < size; ++j) {
+            cin >> c[i][j];
+        }
+    }
+
+    vector<Request> requests(n);
+    for (int i = 0; i < n; ++i) {
+        requests[i] = {i + 1, i + n + 1};
+    }
+
+    vector<int> route;
+    vector<bool> picked(n, false), delivered(n, false);
+    int current = 0;
+    int capacity = 0;
+
+    while (route.size() < 2 * n) {
+        int next = -1;
+        int minDist = INT_MAX;
+
+
+        for (int i = 0; i < n; ++i) {
+            if (!picked[i] && capacity < k) {
+                int dist = c[current][requests[i].pickup];
+                if (dist < minDist) {
+                    minDist = dist;
+                    next = requests[i].pickup;
+                }
+            }
+        }
+
+
+        for (int i = 0; i < n; ++i) {
+            if (picked[i] && !delivered[i]) {
+                int dist = c[current][requests[i].dropoff];
+                if (dist < minDist) {
+                    minDist = dist;
+                    next = requests[i].dropoff;
+                }
+            }
+        }
+
+        if (next == -1) break;
+
+        route.push_back(next);
+        // Update status
+        for (int i = 0; i < n; ++i) {
+            if (next == requests[i].pickup) {
+                picked[i] = true;
+                capacity++;
+            }
+            if (next == requests[i].dropoff) {
+                delivered[i] = true;
+                capacity--;
+            }
+        }
+        current = next;
+    }
+
+
+
+    cout << n << endl;
+    for (int point : route) {
+        cout << point << " ";
+    }
+    cout << endl;
+
     return 0;
 }
-
