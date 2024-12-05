@@ -39,7 +39,7 @@ void BFS(int s)
         u = myq.front();
         myq.pop();
         if (dist[u] == D[s]) // Nếu u đã được duyệt trước đó và có độ dài đường đi từ s đến u bằng D[s] thì bỏ qua
-            continue;        //
+            continue;
         for (int i = 0; i < int(myvt[u].size()); i++)
         {
             v = myvt[u][i];
