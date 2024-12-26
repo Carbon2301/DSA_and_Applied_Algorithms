@@ -1,76 +1,72 @@
 #include <bits/stdc++.h>
+#define ft(i,x,y) for(int i = x; i <= y; i++)
 using namespace std;
 
-const int N = 1e5 + 5;  // Maximum number of nodes
-vector<int> adj[N], rev_adj[N];  // Adjacency lists for original and reversed graph
-bool visited[N];
-stack<int> finish_stack;
+int n, m;
+int num[100001], low[100001], cnt = 0;
+bool critical_point[100001];
 
-void input() {
-    int n, m;
+int p[100001];
+int c[100001], N = 0;
+vector<int> X[100001];
+
+int edge = 0;
+int point = 0;
+
+stack<int> st;
+void run(int u)
+{
+    num[u] = low[u] = ++cnt;
+    st.push(u);
+    int numChild = 0;
+
+    for (int v : X[u])
+    {
+        if (p[u] == v) continue;
+        if (num[v])
+        {
+            low[u] = min(low[u], num[v]);
+        }
+        else
+        {
+            p[v] = u;
+            run(v);
+            low[u] = min(low[u], low[v]);
+        }
+    }
+    if (low[u] == num[u])
+    {
+        int v;
+        N++;
+        do
+        {
+            v = st.top();
+            st.pop();
+            low[v] = num[v] = 1e9;
+            c[v] = N;
+        } while (v != u);
+    }
+}
+int main()
+{
     cin >> n >> m;
-    for (int i = 0; i < m; i++) {
-        int u, v;
-        cin >> u >> v;
-        adj[u].push_back(v);  // Add the edge in the original graph
-        rev_adj[v].push_back(u);  // Add the reversed edge in the reverse graph
-    }
-}
-
-// DFS to process the original graph and push nodes to finish_stack
-void dfs1(int u) {
-    visited[u] = true;
-    for (int v : adj[u]) {
-        if (!visited[v]) {
-            dfs1(v);
-        }
-    }
-    finish_stack.push(u);  // Push to stack when finishing DFS for this node
-}
-
-// DFS on the reversed graph to mark the SCCs
-void dfs2(int u) {
-    visited[u] = true;
-    for (int v : rev_adj[u]) {
-        if (!visited[v]) {
-            dfs2(v);
-        }
-    }
-}
-
-int findSCCs(int n) {
-    fill(visited, visited + n + 1, false);  // Reset visited array
-
-    // Step 1: Perform DFS on the original graph and push nodes to finish_stack
-    for (int i = 1; i <= n; i++) {
-        if (!visited[i]) {
-            dfs1(i);
-        }
+    while (m--)
+    {
+        int a, b;
+        cin >> a >> b;
+        X[a].push_back(b);
     }
 
-    // Step 2: Reverse DFS based on the finish order from the stack
-    fill(visited, visited + n + 1, false);  // Reset visited array for second DFS
-
-    int scc_count = 0;
-    while (!finish_stack.empty()) {
-        int node = finish_stack.top();
-        finish_stack.pop();
-        if (!visited[node]) {
-            // Start a DFS for a new SCC
-            dfs2(node);
-            scc_count++;
-        }
+    ft(i, 1, n)
+    {
+        p[i] = i;
     }
 
-    return scc_count;
-}
+    ft(i, 1, n)
+    {
+        if (!num[i]) run(i);
+    }
 
-int main() {
-    input();
-    int n;
-    cin >> n;
-
-    int result = findSCCs(n);
-    cout << result << endl;
+    cout << N;
     return 0;
 }
